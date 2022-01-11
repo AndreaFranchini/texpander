@@ -79,6 +79,10 @@ If I'm not in a web browser I'm in the terminal working in Vim. I've got some te
 
 ## History
 
+**Version 2.1 - January 11, 2021**
+
+- Change: added infinite multilevel selection based on directories.
+
 **Version 2.0 - November 24, 2017**
 
 - Change: Replace `xclip` with `xsel` because `xclip` tends to strip newlines when pasting into certain application like Gmail on Firefox.

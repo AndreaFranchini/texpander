@@ -21,15 +21,38 @@ base_dir=$(realpath "${HOME}/.texpander")
 shopt -s globstar
 
 # Find regular files in base_dir, pipe output to sed
-abbrvs=$(find "${base_dir}" -type f | sort | sed "s?^${base_dir}/??g")
+# abbrvs=$(find "${base_dir}" -type f | sort | sed "s?^${base_dir}/??g" )
 
-# 'Echo'ing the options instead of passing them directly
-# to zenity allows names like '+1' or '-1'
-name=$(echo ${abbrvs} | tr ' ' '\n' | zenity --list --title=Texpander --width=275 --height=400 --column=Abbreviations)
+# save launch dir
+launch_dir=$(pwd)
+# move to base_dir
+cd ${base_dir}
 
-path="${base_dir}/${name}"
+# search files and folders in base_dir
+choices=$(ls -p --group-directories-first)
+# let user select a file or a folder
+selection=$(zenity --list --title=Texpander --width=275 --height=400 --column=Abbreviations $choices)
 
-if [ -f "${base_dir}/${name}" ]
+rel_path=""
+
+# while the selection is a folder
+while [[ "$selection" == */ ]]
+do
+  rel_path="$rel_path$selection"
+  cd $selection
+  # search files and folders in selected dir
+  choices=$(ls -p --group-directories-first)
+  # let user select a file or a folder
+  selection=$(zenity --list --title=Texpander --width=275 --height=400 --column=Abbreviations $choices)
+done
+
+# return to launch dir
+cd $launch_dir
+
+rel_path="$rel_path$selection"
+path="${base_dir}/${rel_path}"
+
+if [ -f "$path" ]
 then
   if [ -e "$path" ]
   then
@@ -64,6 +87,6 @@ then
     echo $clipboard | xsel -b -i
 
   else
-    zenity --error --text="Abbreviation not found:\n${name}"
+    zenity --error --text="Abbreviation not found:\n${rel_path}"
   fi
 fi
